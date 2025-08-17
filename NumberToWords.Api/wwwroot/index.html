@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Number to Words Converter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root { color-scheme: light dark; }
+    body { 
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      line-height: 1.5;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-color: #010810;
+      color: white;
+    }
+    h1 { 
+      margin-top: 0;
+      color: #F8BD00;
+    }
+    .card { 
+      max-width: 560px; 
+      border: 1px solid #343940; 
+      border-radius: 12px; 
+      padding: 32px; 
+      text-align: center;
+      background-color: #010810;
+    }
+    label { 
+      display: block; 
+      font-weight: 600; 
+      margin-bottom: 8px; 
+      text-align: center;
+      color: white;
+    }
+    input { 
+      width: calc(100% - 24px);
+      padding: 12px;
+      border: 1px solid #343940;
+      border-radius: 8px;
+      font-size: 16px;
+      background: #343940;
+      color: white;
+    }
+    input:focus {
+      outline: 2px solid #F8BD00;
+      border-color: #F8BD00;
+    }
+    button { 
+      display: block;
+      margin: 16px auto 0;
+      padding: 12px 24px;
+      border: 0;
+      border-radius: 8px;
+      background: #F8BD00;
+      color: #010810;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover { 
+      filter: brightness(1.1);
+      transition: filter 0.2s;
+    }
+    .result { 
+      margin-top: 16px; 
+      padding: 12px; 
+      background: #343940; 
+      border: 1px solid #343940; 
+      border-radius: 8px; 
+      color: white; 
+    }
+    .error { 
+      color: #F8BD00; 
+      margin-top: 12px; 
+    }
+    small { 
+      color: #F8BD00;
+    }
+  </style>
+</head>
+<body>
+  <h1>Number to Words Converter</h1>
+  <div class="card" role="region" aria-label="Number to Words Converter">
+    <label for="amount">Enter an amount (e.g., 123.45):</label>
+    <input id="amount" name="amount" inputmode="decimal" placeholder="123.45" aria-describedby="hint" />
+    <small id="hint">Use a dot as decimal separator. Negative values allowed (e.g., -42.10).</small>
+    <div id="error" class="error" role="alert" aria-live="polite"></div>
+    <button id="convertBtn">Convert</button>
+    <div id="result" class="result" aria-live="polite" style="display:none;"></div>
+  </div>
+
+  <script>
+    const btn = document.getElementById('convertBtn');
+    const amountEl = document.getElementById('amount');
+    const errorEl = document.getElementById('error');
+    const resultEl = document.getElementById('result');
+
+    async function convertAmount() {
+      errorEl.textContent = '';
+      resultEl.style.display = 'none';
+      const amount = amountEl.value.trim();
+      try {
+        const res = await fetch(`/convert?amount=${encodeURIComponent(amount)}`);
+        const text = await res.text();
+        if (!res.ok) { errorEl.textContent = text; return; }
+        const data = JSON.parse(text);
+        resultEl.textContent = data.words;
+        resultEl.style.display = 'block';
+      } catch (e) {
+        errorEl.textContent = 'Something went wrong. Please try again.';
+      }
+    }
+
+    // Handle click of 'convert' button
+    btn.addEventListener('click', convertAmount);
+
+    // Handle press of the 'Enter' key
+    amountEl.addEventListener('keypress', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        convertAmount();
+      }
+    });
+  </script>
+</body>
+</html>
